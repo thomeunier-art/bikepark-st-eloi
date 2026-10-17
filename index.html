@@ -150,31 +150,32 @@ button:focus-visible { outline: 3px solid var(--terre); outline-offset: 3px; }
     <div class="lieu">La Ville-du-Bois · Essonne</div>
     <h1>Bikepark St Éloi</h1>
     <div class="piste">Piste bleue Gravity</div>
-    <div class="fiche"><span>405 m</span><span>D− 33 m</span><span>9 virages relevés</span><span>7 tables</span></div>
+    <div class="fiche"><span>405 m</span><span>D− 33 m</span><span>9 virages relevés</span><span>5 tables</span></div>
     <div class="barre" aria-hidden="true"><i id="progres"></i></div>
     <div id="etat" role="status">Chargement du moteur…</div>
     <button id="jouer" type="button" hidden>Jouer</button>
+    <div class="astuce" id="version"></div>
     <div class="astuce">Plein écran sur iPhone : dans Safari, Partager ▸ « Sur l'écran d'accueil », puis lance le jeu depuis son icône, en paysage.</div>
   </div>
 </div>
 
-<script src="index.js"></script>
+<script>
+  // Numéro de version : change à chaque publication pour que les navigateurs (et l'icône
+  // de l'écran d'accueil) téléchargent les nouveaux fichiers au lieu de leur copie en cache.
+  window.VERSION_JEU = "2026-10-17-2344";
+  document.write('<script src="index.js?v=' + window.VERSION_JEU + '"><\/script>');
+</script>
 <script>
 (() => {
-  // Les gros fichiers du jeu sont publiés compressés (gzip) : on les décompresse à la volée
-  // quand le moteur Godot les demande.
-  const COMPRESSES = {};   // GitHub Pages sert les fichiers d'origine (déjà compressés à la volée)
-
+  // Le moteur demande index.wasm et index.pck : on ajoute le numéro de version à l'adresse.
   const fetchOrigine = window.fetch.bind(window);
-  window.fetch = async (ressource, options) => {
+  window.fetch = (ressource, options) => {
     const url = typeof ressource === "string" ? ressource : ressource.url;
-    const nom = Object.keys(COMPRESSES).find((n) => url.split("?")[0].endsWith(n));
-    if (!nom) return fetchOrigine(ressource, options);
-    const reponse = await fetchOrigine(COMPRESSES[nom][0], options);
-    if (!reponse.ok) return reponse;
-    const flux = reponse.body.pipeThrough(new DecompressionStream("gzip"));
-    return new Response(flux, { status: 200, headers: { "Content-Type": COMPRESSES[nom][1] } });
+    if (/index\.(wasm|pck)$/.test(url)) return fetchOrigine(url + "?v=" + window.VERSION_JEU, options);
+    return fetchOrigine(ressource, options);
   };
+  const versionTexte = document.getElementById("version");
+  if (versionTexte) versionTexte.textContent = "Version du " + window.VERSION_JEU.replace(/^(\d{4})-(\d\d)-(\d\d)-(\d\d)(\d\d)$/, "$3/$2/$1 à $4 h $5");
 
   // Son sur iPhone : Safari laisse en sourdine un contexte audio créé hors d'un geste.
   // On garde la main sur les contextes créés par le moteur et on les réveille à chaque appui,
