@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Bikepark St Éloi</title>
+<meta name="description" content="Jeu de VTT 3D sur la piste bleue Gravity du Bikepark St Éloi (La Ville-du-Bois).">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="St Éloi">
+<meta name="theme-color" content="#12160f">
+<link rel="manifest" href="index.manifest.json">
+<link rel="apple-touch-icon" href="index.apple-touch-icon.png">
+<link rel="icon" href="index.icon.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;800&family=Barlow:wght@400;500&display=swap">
+<style>
+/* Écran de chargement d'un jeu (un seul univers sombre de sous-bois) ; le canvas prend tout l'écran. */
+:root {
+  --sous-bois: #12160f;
+  --terre: #d9d2c3;
+  --mousse: #7d8c4a;
+  --panneau: #f2c919;
+  --texte: #e9e6dc;
+  --discret: #9a9a88;
+  --titre: "Barlow Condensed", "Arial Narrow", sans-serif;
+  --corps: "Barlow", system-ui, sans-serif;
+  color-scheme: dark;
+}
+html, body { height: 100%; margin: 0; }
+:root { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+[hidden] { display: none !important; }
+body {
+  background: var(--sous-bois);
+  color: var(--texte);
+  font-family: var(--corps);
+  overflow: hidden;
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+#canvas {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100dvh;
+  display: block;
+  outline: none;
+  background: var(--sous-bois);
+}
+#accueil {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding-block: max(16px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-bottom, 0px));
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  background:
+    radial-gradient(120% 80% at 50% 110%, color-mix(in oklab, var(--mousse) 35%, transparent), transparent 60%),
+    var(--sous-bois);
+}
+.carte {
+  display: grid;
+  gap: 14px;
+  justify-items: center;
+  text-align: center;
+  max-width: 34rem;
+}
+.lieu {
+  font-family: var(--titre);
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+  color: var(--discret);
+}
+h1 {
+  margin: 0;
+  font-family: var(--titre);
+  font-weight: 800;
+  font-size: clamp(3rem, 12vw, 5.5rem);
+  line-height: 0.9;
+  letter-spacing: 0.02em;
+  color: var(--panneau);
+  text-wrap: balance;
+}
+.piste {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1rem;
+  color: var(--terre);
+}
+.piste::before {
+  content: "";
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  background: #2f6fd8;
+}
+.fiche {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px 18px;
+  font-variant-numeric: tabular-nums;
+  color: var(--discret);
+  font-size: 0.9rem;
+}
+.barre {
+  width: min(22rem, 80vw);
+  height: 6px;
+  border-radius: 3px;
+  background: color-mix(in oklab, var(--terre) 18%, transparent);
+  overflow: hidden;
+}
+.barre i {
+  display: block;
+  height: 100%;
+  width: 0%;
+  background: var(--terre);
+  transition: width 0.2s;
+}
+#etat { min-height: 1.4em; font-size: 0.95rem; }
+button {
+  font-family: var(--titre);
+  font-weight: 800;
+  font-size: 1.6rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 12px 42px;
+  border: 0;
+  border-radius: 6px;
+  background: var(--panneau);
+  color: var(--sous-bois);
+  cursor: pointer;
+}
+button:focus-visible { outline: 3px solid var(--terre); outline-offset: 3px; }
+.astuce { font-size: 0.85rem; color: var(--discret); max-width: 26rem; }
+@media (prefers-reduced-motion: reduce) { .barre i { transition: none; } }
+</style>
+
+</head>
+<body>
+<canvas id="canvas" tabindex="0">Ton navigateur ne gère pas WebGL 2.</canvas>
+
+<div id="accueil">
+  <div class="carte">
+    <div class="lieu">La Ville-du-Bois · Essonne</div>
+    <h1>Bikepark St Éloi</h1>
+    <div class="piste">Piste bleue Gravity</div>
+    <div class="fiche"><span>405 m</span><span>D− 33 m</span><span>9 virages relevés</span><span>7 tables</span></div>
+    <div class="barre" aria-hidden="true"><i id="progres"></i></div>
+    <div id="etat" role="status">Chargement du moteur…</div>
+    <button id="jouer" type="button" hidden>Jouer</button>
+    <div class="astuce">Plein écran sur iPhone : dans Safari, Partager ▸ « Sur l'écran d'accueil », puis lance le jeu depuis son icône, en paysage.</div>
+  </div>
+</div>
+
+<script src="index.js"></script>
+<script>
+(() => {
+  // Les gros fichiers du jeu sont publiés compressés (gzip) : on les décompresse à la volée
+  // quand le moteur Godot les demande.
+  const COMPRESSES = {};   // GitHub Pages sert les fichiers d'origine (déjà compressés à la volée)
+
+  const fetchOrigine = window.fetch.bind(window);
+  window.fetch = async (ressource, options) => {
+    const url = typeof ressource === "string" ? ressource : ressource.url;
+    const nom = Object.keys(COMPRESSES).find((n) => url.split("?")[0].endsWith(n));
+    if (!nom) return fetchOrigine(ressource, options);
+    const reponse = await fetchOrigine(COMPRESSES[nom][0], options);
+    if (!reponse.ok) return reponse;
+    const flux = reponse.body.pipeThrough(new DecompressionStream("gzip"));
+    return new Response(flux, { status: 200, headers: { "Content-Type": COMPRESSES[nom][1] } });
+  };
+
+  // Son sur iPhone : Safari laisse en sourdine un contexte audio créé hors d'un geste.
+  // On garde la main sur les contextes créés par le moteur et on les réveille à chaque appui,
+  // en jouant un son vide pendant le geste (exigence d'iOS).
+  // iPhone en mode silencieux : Safari classe le son web en « ambiance » et le coupe.
+  // On demande la catégorie « lecture » (comme la musique), qui ignore le mode silencieux :
+  //  1. API Audio Session (Safari récent) ;
+  //  2. sinon, un son HTML silencieux en boucle, lancé au premier appui, fait basculer iOS.
+  try { if (navigator.audioSession) navigator.audioSession.type = "playback"; } catch (e) {}
+  const wavSilencieux = (() => {
+    const n = 4410, octets = new Uint8Array(44 + n * 2), v = new DataView(octets.buffer);
+    const ecrire = (o, t) => { for (let i = 0; i < t.length; i++) octets[o + i] = t.charCodeAt(i); };
+    ecrire(0, "RIFF"); v.setUint32(4, 36 + n * 2, true); ecrire(8, "WAVEfmt ");
+    v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true);
+    v.setUint32(24, 44100, true); v.setUint32(28, 88200, true); v.setUint16(32, 2, true); v.setUint16(34, 16, true);
+    ecrire(36, "data"); v.setUint32(40, n * 2, true);
+    let b = ""; for (const x of octets) b += String.fromCharCode(x);
+    return "data:audio/wav;base64," + btoa(b);
+  })();
+  const lecteurSilencieux = new Audio(wavSilencieux);
+  lecteurSilencieux.loop = true;
+  lecteurSilencieux.setAttribute("playsinline", "");
+  let sessionDebloquee = false;
+  const debloquerSession = () => {
+    if (sessionDebloquee) return;
+    lecteurSilencieux.play().then(() => { sessionDebloquee = true; }).catch(() => {});
+  };
+
+  const contextes = [];
+  const Origine = window.AudioContext || window.webkitAudioContext;
+  if (Origine) {
+    const Capte = function (...args) {
+      const ctx = new Origine(...args);
+      contextes.push(ctx);
+      return ctx;
+    };
+    Capte.prototype = Origine.prototype;
+    window.AudioContext = Capte;
+    if (window.webkitAudioContext) window.webkitAudioContext = Capte;
+  }
+  const reveiller = () => {
+    debloquerSession();
+    for (const ctx of contextes) {
+      if (ctx.state !== "running") ctx.resume().catch(() => {});
+      try {
+        const vide = ctx.createBuffer(1, 1, ctx.sampleRate);
+        const source = ctx.createBufferSource();
+        source.buffer = vide;
+        source.connect(ctx.destination);
+        source.start(0);
+      } catch (e) { /* contexte fermé */ }
+    }
+  };
+  for (const evt of ["touchend", "pointerup", "click", "keydown"]) {
+    window.addEventListener(evt, reveiller, { capture: true, passive: true });
+  }
+  // L'onglet revient au premier plan : iOS a pu suspendre le son.
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) reveiller(); });
+
+  const etat = document.getElementById("etat");
+  const progres = document.getElementById("progres");
+  const bouton = document.getElementById("jouer");
+  const accueil = document.getElementById("accueil");
+
+  const config = {
+    args: [],
+    canvas: document.getElementById("canvas"),
+    canvasResizePolicy: 2,
+    executable: "index",
+    mainPack: "index.pck",
+    fileSizes: { "index.pck": 2588360, "index.wasm": 37695054 },
+    focusCanvas: true,
+    experimentalVK: false,
+    ensureCrossOriginIsolationHeaders: false,
+    gdextensionLibs: [],
+    emscriptenPoolSize: 8,
+    godotPoolSize: 4,
+    serviceWorker: "",
+    onProgress: (fait, total) => {
+      if (total > 0) progres.style.width = Math.min(100, (100 * fait) / total).toFixed(1) + "%";
+    },
+    onPrint: (...t) => console.log(...t),
+    onPrintError: (...t) => console.warn(...t),
+  };
+
+  const manque = Engine.getMissingFeatures({ threads: false });
+  if (manque.length) {
+    etat.textContent = "Ce navigateur ne peut pas lancer le jeu : " + manque.join(", ");
+    return;
+  }
+
+  const moteur = new Engine(config);
+  // Le son ne peut démarrer qu'après un geste : on charge d'abord, puis « Jouer » lance le jeu.
+  moteur.init("index").then(() => {
+    progres.style.width = "100%";
+    etat.textContent = "Prêt.";
+    bouton.hidden = false;
+    bouton.focus();
+  }).catch((e) => {
+    etat.textContent = "Le chargement a échoué : " + (e && e.message ? e.message : e);
+  });
+
+  bouton.addEventListener("click", () => {
+    // Plein écran (ordinateur, Android, iPad). Safari sur iPhone ne le permet pas : on ignore le refus.
+    const racine = document.documentElement;
+    const pleinEcran = racine.requestFullscreen || racine.webkitRequestFullscreen;
+    if (pleinEcran) {
+      try {
+        const r = pleinEcran.call(racine, { navigationUI: "hide" });
+        if (r && r.catch) r.catch(() => {});
+      } catch (e) { /* refusé par le navigateur */ }
+    }
+    bouton.disabled = true;
+    etat.textContent = "Génération de la forêt…";
+    moteur.startGame(config).then(() => {
+      accueil.hidden = true;
+      document.getElementById("canvas").focus();
+    }).catch((e) => {
+      bouton.disabled = false;
+      etat.textContent = "Le jeu n'a pas pu démarrer : " + (e && e.message ? e.message : e);
+    });
+  });
+})();
+</script>
+</body>
+</html>
