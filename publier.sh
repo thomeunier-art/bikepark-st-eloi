@@ -7,6 +7,7 @@ P=$(stat -f %z index.pck); W=$(stat -f %z index.wasm)
 V=$(date +%Y-%m-%d-%H%M)
 sed -i '' -E "s/fileSizes: \{ \"index.pck\": [0-9]+, \"index.wasm\": [0-9]+ \}/fileSizes: { \"index.pck\": $P, \"index.wasm\": $W }/" index.html
 sed -i '' -E "s/window.VERSION_JEU = \"[^\"]*\"/window.VERSION_JEU = \"$V\"/" index.html
+sed -i '' -E "s/^const VERSION = \"[^\"]*\";/const VERSION = \"$V\";/" sw.js
 git add -A
 git commit -q -m "${1:-Mise à jour du jeu} ($V)
 
