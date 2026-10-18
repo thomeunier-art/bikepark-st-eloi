@@ -10,9 +10,9 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="St Éloi">
 <meta name="theme-color" content="#12160f">
-<link rel="manifest" href="index.manifest.json">
-<link rel="apple-touch-icon" href="index.apple-touch-icon.png">
-<link rel="icon" href="index.icon.png">
+<link rel="manifest" href="app.webmanifest">
+<link rel="apple-touch-icon" sizes="180x180" href="logo-st-eloi-apple.png">
+<link rel="icon" type="image/png" href="logo-st-eloi-128.png">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;800&family=Barlow:wght@400;500&display=swap">
 <style>
 /* Écran de chargement d'un jeu (un seul univers sombre de sous-bois) ; le canvas prend tout l'écran. */
@@ -162,7 +162,7 @@ button:focus-visible { outline: 3px solid var(--terre); outline-offset: 3px; }
 <script>
   // Numéro de version : change à chaque publication pour que les navigateurs (et l'icône
   // de l'écran d'accueil) téléchargent les nouveaux fichiers au lieu de leur copie en cache.
-  window.VERSION_JEU = "2026-10-18-2322";
+  window.VERSION_JEU = "2026-10-18-2327";
   document.write('<script src="index.js?v=' + window.VERSION_JEU + '"><\/script>');
   // PWA : le service worker garde le jeu sur l'appareil (lancement rapide, hors connexion).
   if ("serviceWorker" in navigator) {
