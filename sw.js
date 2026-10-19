@@ -1,7 +1,7 @@
 // Service worker du jeu « Bikepark St Éloi » : garde le jeu sur l'iPhone pour qu'il se lance
 // vite et fonctionne hors connexion. VERSION est remplacée à chaque publication (publier.sh) :
 // une nouvelle version crée un nouveau cache et supprime l'ancien.
-const VERSION = "2026-10-19-0027";
+const VERSION = "2026-10-19-1959";
 const CACHE = "bikepark-st-eloi-" + VERSION;
 const FICHIERS = [
   "./",
@@ -12,6 +12,7 @@ const FICHIERS = [
   "index.audio.worklet.js",
   "index.audio.position.worklet.js",
   "app.webmanifest",
+  "logo-st-eloi.png",
   "logo-st-eloi-128.png",
   "logo-st-eloi-apple.png",
   "logo-st-eloi-144.png",

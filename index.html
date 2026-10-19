@@ -76,6 +76,7 @@ body {
   font-size: 0.85rem;
   color: var(--discret);
 }
+.logo { width: 170px; height: auto; border-radius: 12px; background: #fff; }
 h1 {
   margin: 0;
   font-family: var(--titre);
@@ -148,9 +149,10 @@ button:focus-visible { outline: 3px solid var(--terre); outline-offset: 3px; }
 <div id="accueil">
   <div class="carte">
     <div class="lieu">La Ville-du-Bois · Essonne</div>
+    <img class="logo" src="logo-st-eloi.png" alt="Bike Park Saint-Éloi" width="170" height="171">
     <h1>Bikepark St Éloi</h1>
     <div class="piste">Piste bleue Gravity</div>
-    <div class="fiche"><span>380 m</span><span>D− 25 m</span><span>7 virages relevés</span><span>5 tables</span></div>
+    <div class="fiche"><span>377 m</span><span>D− 13 m</span><span>7 virages relevés</span><span>2 ponts en bois</span></div>
     <div class="barre" aria-hidden="true"><i id="progres"></i></div>
     <div id="etat" role="status">Chargement du moteur…</div>
     <button id="jouer" type="button" hidden>Jouer</button>
@@ -162,7 +164,7 @@ button:focus-visible { outline: 3px solid var(--terre); outline-offset: 3px; }
 <script>
   // Numéro de version : change à chaque publication pour que les navigateurs (et l'icône
   // de l'écran d'accueil) téléchargent les nouveaux fichiers au lieu de leur copie en cache.
-  window.VERSION_JEU = "2026-10-19-0027";
+  window.VERSION_JEU = "2026-10-19-1959";
   document.write('<script src="index.js?v=' + window.VERSION_JEU + '"><\/script>');
   // PWA : le service worker garde le jeu sur l'appareil (lancement rapide, hors connexion).
   if ("serviceWorker" in navigator) {
@@ -252,7 +254,7 @@ button:focus-visible { outline: 3px solid var(--terre); outline-offset: 3px; }
     canvasResizePolicy: 2,
     executable: "index",
     mainPack: "index.pck",
-    fileSizes: { "index.pck": 3997676, "index.wasm": 37695054 },
+    fileSizes: { "index.pck": 5694212, "index.wasm": 37695054 },
     focusCanvas: true,
     experimentalVK: false,
     ensureCrossOriginIsolationHeaders: false,
