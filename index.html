@@ -52,8 +52,10 @@ body {
 #accueil {
   position: fixed;
   inset: 0;
-  display: grid;
-  place-items: center;
+  display: flex;               /* .carte centrée par ses marges auto : jamais coupée en haut si elle déborde */
+  overflow-y: auto;            /* écran très petit : on peut faire défiler jusqu'au bouton */
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
   padding-block: max(16px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-bottom, 0px));
   padding-left: max(16px, env(safe-area-inset-left, 0px));
   padding-right: max(16px, env(safe-area-inset-right, 0px));
@@ -67,6 +69,7 @@ body {
   justify-items: center;
   text-align: center;
   max-width: 34rem;
+  margin: auto;
 }
 .lieu {
   font-family: var(--titre);
@@ -140,6 +143,18 @@ button {
 button:focus-visible { outline: 3px solid var(--terre); outline-offset: 3px; }
 .astuce { font-size: 0.85rem; color: var(--discret); max-width: 26rem; }
 @media (prefers-reduced-motion: reduce) { .barre i { transition: none; } }
+/* Téléphone en paysage (hauteur ~350 px) : tout doit tenir, bouton Jouer compris. */
+@media (max-height: 520px) {
+  #accueil { padding-block: max(8px, env(safe-area-inset-top, 0px)) max(8px, env(safe-area-inset-bottom, 0px)); }
+  .carte { gap: 6px; }
+  .lieu, .fiche, .astuce { display: none; }
+  .logo { width: 72px; height: auto; border-radius: 8px; }
+  h1 { font-size: clamp(1.8rem, 7vh, 2.6rem); }
+  .piste { font-size: 0.9rem; }
+  .barre { width: min(18rem, 60vw); }
+  #etat { min-height: 1.2em; font-size: 0.85rem; }
+  button { font-size: 1.3rem; padding: 8px 36px; }
+}
 </style>
 
 </head>
@@ -164,7 +179,7 @@ button:focus-visible { outline: 3px solid var(--terre); outline-offset: 3px; }
 <script>
   // Numéro de version : change à chaque publication pour que les navigateurs (et l'icône
   // de l'écran d'accueil) téléchargent les nouveaux fichiers au lieu de leur copie en cache.
-  window.VERSION_JEU = "2026-10-20-2020";
+  window.VERSION_JEU = "2026-10-20-2221";
   document.write('<script src="index.js?v=' + window.VERSION_JEU + '"><\/script>');
   // PWA : le service worker garde le jeu sur l'appareil (lancement rapide, hors connexion).
   if ("serviceWorker" in navigator) {
@@ -254,7 +269,7 @@ button:focus-visible { outline: 3px solid var(--terre); outline-offset: 3px; }
     canvasResizePolicy: 2,
     executable: "index",
     mainPack: "index.pck",
-    fileSizes: { "index.pck": 2919276, "index.wasm": 37695054 },
+    fileSizes: { "index.pck": 2919548, "index.wasm": 37695054 },
     focusCanvas: true,
     experimentalVK: false,
     ensureCrossOriginIsolationHeaders: false,
