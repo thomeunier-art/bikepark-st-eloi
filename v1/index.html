@@ -178,7 +178,7 @@ button:focus-visible { outline: 3px solid var(--terre); outline-offset: 3px; }
 <script>
   // Numéro de version : change à chaque publication pour que les navigateurs (et l'icône
   // de l'écran d'accueil) téléchargent les nouveaux fichiers au lieu de leur copie en cache.
-  window.VERSION_JEU = "2026-10-25-2003";
+  window.VERSION_JEU = "2026-10-25-2034";
   document.write('<script src="index.js?v=' + window.VERSION_JEU + '"><\/script>');
   // Page gardée en cache par le navigateur (jusqu'à 10 min sur GitHub Pages, plus sur iPhone) :
   // on compare avec la version publiée et on recharge la page si une plus récente existe.
@@ -268,7 +268,7 @@ button:focus-visible { outline: 3px solid var(--terre); outline-offset: 3px; }
     canvasResizePolicy: 2,
     executable: "index",
     mainPack: "index.pck",
-    fileSizes: { "index.pck": 8183932, "index.wasm": 37695054 },
+    fileSizes: { "index.pck": 8185388, "index.wasm": 37695054 },
     focusCanvas: true,
     experimentalVK: false,
     ensureCrossOriginIsolationHeaders: false,
@@ -291,11 +291,27 @@ button:focus-visible { outline: 3px solid var(--terre); outline-offset: 3px; }
 
   const moteur = new Engine(config);
   // Le son ne peut démarrer qu'après un geste : on charge d'abord, puis « Jouer » lance le jeu.
+  // Pas d'écran d'accueil HTML : le jeu s'ouvre directement sur le choix des pistes.
+  // Le premier toucher (n'importe où) active le plein écran et débloque le son.
+  const demarrer = () => {
+    if (demarrer.fait) return;
+    demarrer.fait = true;
+    const racine = document.documentElement;
+    const pleinEcran = racine.requestFullscreen || racine.webkitRequestFullscreen;
+    if (pleinEcran) {
+      try { const r = pleinEcran.call(racine, { navigationUI: "hide" }); if (r && r.catch) r.catch(() => {}); } catch (e) {}
+    }
+    activerMouvement();
+  };
+  window.addEventListener("pointerdown", demarrer, { once: false, capture: true, passive: true });
   moteur.init("index").then(() => {
     progres.style.width = "100%";
-    etat.textContent = "Prêt.";
-    bouton.hidden = false;
-    bouton.focus();
+    etat.textContent = "";
+    bouton.hidden = true;
+    return moteur.startGame(config);
+  }).then(() => {
+    accueil.hidden = true;
+    document.getElementById("canvas").focus();
   }).catch((e) => {
     etat.textContent = "Le chargement a échoué : " + (e && e.message ? e.message : e);
   });
