@@ -165,7 +165,7 @@ button:focus-visible { outline: 3px solid var(--terre); outline-offset: 3px; }
     <div class="lieu">La Ville-du-Bois · Essonne</div>
     <img class="logo" src="../logo-st-eloi.png" alt="Bike Park Saint-Éloi" width="170" height="171">
     <h1>Bikepark St Éloi</h1>
-    <div class="piste">V1 · aperçu du moteur 3D</div>
+    <div class="piste">V1 · physique et jouabilité</div>
     <div class="fiche"><span>Verte 169 m</span><span>Gravity 312 m</span><span>piste de 2 m</span><span>forêt de feuillus</span></div>
     <div class="barre" aria-hidden="true"><i id="progres"></i></div>
     <div id="etat" role="status">Chargement du moteur…</div>
@@ -178,7 +178,7 @@ button:focus-visible { outline: 3px solid var(--terre); outline-offset: 3px; }
 <script>
   // Numéro de version : change à chaque publication pour que les navigateurs (et l'icône
   // de l'écran d'accueil) téléchargent les nouveaux fichiers au lieu de leur copie en cache.
-  window.VERSION_JEU = "2026-10-25-1108";
+  window.VERSION_JEU = "2026-10-25-1126";
   document.write('<script src="index.js?v=' + window.VERSION_JEU + '"><\/script>');
 </script>
 <script>
@@ -262,7 +262,7 @@ button:focus-visible { outline: 3px solid var(--terre); outline-offset: 3px; }
     canvasResizePolicy: 2,
     executable: "index",
     mainPack: "index.pck",
-    fileSizes: { "index.pck": 3268356, "index.wasm": 37695054 },
+    fileSizes: { "index.pck": 3306920, "index.wasm": 37695054 },
     focusCanvas: true,
     experimentalVK: false,
     ensureCrossOriginIsolationHeaders: false,
@@ -294,7 +294,34 @@ button:focus-visible { outline: 3px solid var(--terre); outline-offset: 3px; }
     etat.textContent = "Le chargement a échoué : " + (e && e.message ? e.message : e);
   });
 
+  // Direction par inclinaison du téléphone (comme un guidon) : angle de la gravité dans le plan de l'écran,
+  // mesuré par rapport à la position tenue au départ (window.steloiCalibrer, appelée à chaque départ).
+  // Résultat dans window.steloiInclinaison : -1 (droite) .. +1 (gauche), zone morte de 3°, plein braquage à 25°.
+  window.steloiInclinaison = 0;
+  let angleTel = null, angleRef = null;
+  const mouvement = (e) => {
+    const g = e.accelerationIncludingGravity;
+    if (!g || g.x === null) return;
+    angleTel = Math.atan2(g.y, g.x);
+    if (angleRef === null) angleRef = angleTel;
+    let d = angleTel - angleRef;
+    d = Math.atan2(Math.sin(d), Math.cos(d));
+    const zone = 3 * Math.PI / 180, plein = 25 * Math.PI / 180;
+    const a = Math.max(0, Math.abs(d) - zone) / (plein - zone);
+    window.steloiInclinaison = -Math.sign(d) * Math.min(1, a);
+  };
+  window.steloiCalibrer = () => { if (angleTel !== null) angleRef = angleTel; };
+  const activerMouvement = () => {
+    const D = window.DeviceMotionEvent;
+    if (D && typeof D.requestPermission === "function") {
+      D.requestPermission().then((r) => { if (r === "granted") window.addEventListener("devicemotion", mouvement); }).catch(() => {});
+    } else if (D) {
+      window.addEventListener("devicemotion", mouvement);
+    }
+  };
+
   bouton.addEventListener("click", () => {
+    activerMouvement();
     // Plein écran (ordinateur, Android, iPad). Safari sur iPhone ne le permet pas : on ignore le refus.
     const racine = document.documentElement;
     const pleinEcran = racine.requestFullscreen || racine.webkitRequestFullscreen;
