@@ -178,8 +178,14 @@ button:focus-visible { outline: 3px solid var(--terre); outline-offset: 3px; }
 <script>
   // Numéro de version : change à chaque publication pour que les navigateurs (et l'icône
   // de l'écran d'accueil) téléchargent les nouveaux fichiers au lieu de leur copie en cache.
-  window.VERSION_JEU = "2026-10-25-1941";
+  window.VERSION_JEU = "2026-10-25-1943";
   document.write('<script src="index.js?v=' + window.VERSION_JEU + '"><\/script>');
+  // Page gardée en cache par le navigateur (jusqu'à 10 min sur GitHub Pages, plus sur iPhone) :
+  // on compare avec la version publiée et on recharge la page si une plus récente existe.
+  fetch("version.txt?t=" + Date.now(), { cache: "no-store" }).then((r) => r.ok ? r.text() : "").then((v) => {
+    v = v.trim();
+    if (v && v !== window.VERSION_JEU && !location.search.includes("v=" + v)) location.replace(location.pathname + "?v=" + v);
+  }).catch(() => {});
 </script>
 <script>
 (() => {
