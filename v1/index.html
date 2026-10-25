@@ -163,7 +163,7 @@ button:focus-visible { outline: 3px solid var(--terre); outline-offset: 3px; }
 #tourner .titre { font-family: "Barlow Condensed", "Arial Narrow", sans-serif; font-weight: 800; font-size: 40px; color: #f2c919; letter-spacing: 0.02em; }
 #tourner .texte { font-size: 18px; color: #c9c6ba; max-width: 20rem; }
 @keyframes tourne { 0%, 20% { transform: rotate(0deg); } 50%, 75% { transform: rotate(-90deg); } 100% { transform: rotate(0deg); } }
-@media (orientation: portrait) and (pointer: coarse) { #tourner { display: flex; } body > #canvas, body > #accueil { visibility: hidden; } }
+@media (orientation: portrait) and (max-width: 820px) { #tourner { display: flex; } body > #canvas, body > #accueil { visibility: hidden; } }
 </style>
 
 </head>
